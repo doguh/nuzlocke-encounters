@@ -62,6 +62,14 @@ export default function App() {
     <div className="app-container">
       <div className="select-container">
         <select
+          className="version-select"
+          value={gameVersion}
+          onChange={(e) => handleGameVersionChange(e.target.value)}
+        >
+          <option value="scarlet">Scarlet</option>
+          <option value="violet">Violet</option>
+        </select>
+        <select
           className="area-select"
           value={area?.name || ""}
           onChange={(e) => {
@@ -75,15 +83,6 @@ export default function App() {
               {area.name}
             </option>
           ))}
-        </select>
-
-        <select
-          className="version-select"
-          value={gameVersion}
-          onChange={(e) => handleGameVersionChange(e.target.value)}
-        >
-          <option value="scarlet">Scarlet</option>
-          <option value="violet">Violet</option>
         </select>
       </div>
 
