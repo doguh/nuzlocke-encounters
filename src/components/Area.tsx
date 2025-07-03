@@ -15,9 +15,7 @@ export default function AreaComponent(props: AreaProps) {
   const [generatedEncounter, setGeneratedEncounter] = useState<string | null>(
     null
   );
-  const [bounce, setBounce] = useState(false);
-  const [justGenerated, setJustGenerated] = useState(false);
-  const prevEncounter = useRef<string | null>(null);
+  const encounterImageRef = useRef<HTMLImageElement>(null);
 
   // Filter Pokémon based on game version
   const availablePokemons = area.pokemons.filter((pokemon) => {
@@ -39,25 +37,9 @@ export default function AreaComponent(props: AreaProps) {
       const savedEncounter = encounters[area.name];
       if (savedEncounter) {
         setGeneratedEncounter(savedEncounter);
-        setJustGenerated(false); // Do not animate on mount
       }
     }
   }, [area.name]);
-
-  // Confetti and bounce effect only when justGenerated is true
-  useEffect(() => {
-    if (generatedEncounter && justGenerated) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
-      setBounce(true);
-      setTimeout(() => setBounce(false), 700);
-      setJustGenerated(false);
-      prevEncounter.current = generatedEncounter;
-    }
-  }, [generatedEncounter, justGenerated]);
 
   const generateEncounter = () => {
     const randomIndex = Math.floor(Math.random() * availablePokemons.length);
@@ -70,7 +52,20 @@ export default function AreaComponent(props: AreaProps) {
     encounters[area.name] = selectedPokemon;
     localStorage.setItem("encounters", JSON.stringify(encounters));
 
-    setJustGenerated(true);
+    // Trigger confetti and bounce effects
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    // Trigger bounce animation by adding and removing the class
+    if (encounterImageRef.current) {
+      encounterImageRef.current.classList.remove("bounce");
+      // Force reflow to ensure the animation triggers
+      void encounterImageRef.current.offsetHeight;
+      encounterImageRef.current.classList.add("bounce");
+    }
   };
 
   const regenerateEncounter = () => {
@@ -87,8 +82,6 @@ export default function AreaComponent(props: AreaProps) {
       delete encounters[area.name];
       localStorage.setItem("encounters", JSON.stringify(encounters));
     }
-
-    setJustGenerated(false);
   };
 
   const handleManualSelect = (pokemon: string) => {
@@ -100,7 +93,20 @@ export default function AreaComponent(props: AreaProps) {
     encounters[area.name] = pokemon;
     localStorage.setItem("encounters", JSON.stringify(encounters));
 
-    setJustGenerated(true);
+    // Trigger confetti and bounce effects
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    // Trigger bounce animation by adding and removing the class
+    if (encounterImageRef.current) {
+      encounterImageRef.current.classList.remove("bounce");
+      // Force reflow to ensure the animation triggers
+      void encounterImageRef.current.offsetHeight;
+      encounterImageRef.current.classList.add("bounce");
+    }
   };
 
   return (
@@ -124,9 +130,10 @@ export default function AreaComponent(props: AreaProps) {
             <h2>Your Encounter:</h2>
             <div className="encounter-pokemon">
               <img
+                ref={encounterImageRef}
                 src={getPokeDbSpriteUrl(generatedEncounter)}
                 alt={generatedEncounter}
-                className={`encounter-image${bounce ? " bounce" : ""}`}
+                className="encounter-image"
               />
               <span className="encounter-name">{generatedEncounter}</span>
             </div>
